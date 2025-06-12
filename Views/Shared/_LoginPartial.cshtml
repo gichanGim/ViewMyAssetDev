@@ -1,0 +1,20 @@
+﻿@using Microsoft.AspNetCore.Identity;
+@inject SignInManager<Users> signInManager;
+
+<ul class="navbar-nav ms-auto">
+    @if (signInManager.IsSignedIn(User)) 
+    {
+        <li class="nav-item">
+            <a class="nav-link text-white" style="font-size:14px;" asp-controller="Account" asp-action="Logout">로그아웃</a>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-white" style="font-size:14px;" asp-controller="Account" asp-action="Login">로그인</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white" style="font-size:14px;" asp-controller="Account" asp-action="Register">회원가입</a>
+        </li>
+    }
+</ul>

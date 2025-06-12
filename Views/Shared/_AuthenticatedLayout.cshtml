@@ -1,0 +1,183 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ViewMyAssetDev</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/authenticated.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ViewMyAssetDev.style.css" asp-append-version="true" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-dark box-shadow mb-0">
+            <div class="container-fluid mx-5">
+                <a class="navbar-brand text-white" asp-area="" asp-controller="Authenticated" asp-action="Main">ViewMyAssetDev</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between ms-5">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-white mx-2" asp-area="" asp-controller="Authenticated" asp-action="Main">홈</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white mx-2" asp-area="" asp-controller="Authenticated" asp-action="MyAsset">내 자산</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white mx-2" asp-area="" asp-controller="Home" asp-action="Privacy">회원 정보 변경</a>
+                        </li>
+                    </ul>
+                    <form class="me-5">
+                        <input type="search" autocomplete="off" id="searchBox" class="form-control" placeholder="종목 코드로 검색" style="width:450px;" />
+                        <i class="fas fa-search search-icon"></i>
+                        <ul class="text-black" id="suggestionList" style="width:450px;"></ul>
+                    </form>
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div>
+            @RenderBody()
+    </div>
+
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let chartData;
+
+        const rawJson = document.getElementById("chart-data").dataset.json;
+        chartData = JSON.parse(rawJson);
+        console.log("json 데이터 확인 : ", chartData);
+
+        const ctx = document.getElementById("radarChart").getContext("2d");
+
+        const doughnutChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['GDP', '실업률', '인플레이션률', '기준금리', '소비자신뢰지수', '산업생산지수', '비농업 신규 고용자지수', '소비판매액'],
+                datasets: [{
+                    label: '경제 지표 점수',
+                    data: chartData,
+                    borderColor: '#ffa647', // 차트 선 색상
+                    backgroundColor: 'rgba(255, 166, 71, 0.2)', // 안쪽 영역 색상 (투명도 0.2)
+                    pointBackgroundColor: '#ffa647', // 각 점의 배경색
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                responsive: true,
+                scales: {
+                    r: {
+                        suggestedMin: 0,
+                        suggestedMax: 1,
+                        ticks:{
+                            stepSize:0.2    
+                        },
+                        pointLabels: {
+                            font: {
+                                size: 20,
+                                weight: 'bold'
+                            },
+                            color: '#333',
+                            padding: 20
+                        },
+                        grid: {
+                            color: '#eee'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            let debounceTimer; // 디바운싱 타이머 변수
+
+            $("#searchBox").on("keyup", function () {
+                clearTimeout(debounceTimer); // 이전 타이머 제거
+
+                var query = $(this).val();
+                if (query.length > 0) {
+                    debounceTimer = setTimeout(function () { // 300ms 후 실행
+                        fetchAutocompleteResults(query);
+                    }, 10);
+                } else {
+                    $("#suggestionList").hide();
+                }
+            });
+
+            // 자동완성 목록 가져오는 함수 (AJAX 요청)
+            function fetchAutocompleteResults(query) {
+                $.ajax({
+                    url: "/Authenticated/ReturnCodesJson",
+                    type: "GET",
+                    data: { code: query },
+                    success: function (data) {
+                        var suggestionList = $("#suggestionList");
+                        suggestionList.empty();
+
+                        if (data.length > 0) {
+                            data.forEach(function (item) {
+                                suggestionList.append(
+                                    "<li class='suggestion-item' data-symbol='" + item.symbol + "'>" +
+                                    item.symbol + " - " + item.name + " - " + item.exchDisp +
+                                    "</li>"
+                                );
+                            });
+                            suggestionList.show();
+                        }
+                        else {
+                            suggestionList.hide();
+                        }
+                    },
+                    error: function () {
+                        console.error("자동완성 데이터를 가져오는 중 오류 발생");
+                    }
+                });
+            }
+
+            $(document).on("click", ".suggestion-item", function () {
+                var selectedSymbol = $(this).data("symbol"); // 선택된 심볼 값 가져오기
+                $("#searchBox").val(selectedSymbol);
+                $("#suggestionList").hide();
+
+                // 선택된 심볼 값을 서버로 전달하여 액션 메서드 실행
+                sendSelectedSymbolToServer(selectedSymbol);
+            });
+
+            function sendSelectedSymbolToServer(symbol) {
+                $.ajax({
+                    url: "/Authenticated/ReturnSuccessAjax", // 실행할 액션 메서드 URL
+                    type: "POST", // POST 방식으로 데이터 전송
+                    data: { symbol: symbol }, // 선택된 symbol 값 전달
+                    success: function (response) {
+                        if (response.success) {
+                            window.location.href = response.redirectUrl; // AJAX 응답에서 받은 URL로 이동
+                        } else {
+                            alert(response.message); // 오류 메시지 표시
+                        }
+                    },
+                    error: function () {
+                        alert("서버 요청 중 오류가 발생했습니다.");
+                    }
+                });
+            }
+        });
+    </script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

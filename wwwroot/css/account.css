@@ -1,0 +1,48 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Gothic+A1&display=swap');
+
+.account-container {
+    background-color: #282828;
+    background-size: cover;
+    background-position: center;
+    background-repeat: repeat-y;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+.account-box {
+    background-color: #282828;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 100%;
+    opacity: 9;
+    font-family: "Gothic A1", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    color: #ffffff;
+}
+.login-container{
+    display:flex;
+    height:100vh;
+}
+.login-left {
+    flex: 1;
+    background-image: url('../images/loginbackground.jpeg');
+    background-position: center;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+}
+.login-right {
+    flex: 1;
+    background-color: #282828;
+    color: #ffffff;
+    justify-content: center;
+    align-items: center;
+    font-family: "Gothic A1", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+.form-container{
+    padding: 50px 180px;
+}

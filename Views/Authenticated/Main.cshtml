@@ -1,0 +1,182 @@
+﻿@using System.Globalization;
+@using Newtonsoft.Json;
+@using ViewMyAssetDev.ViewModels;
+@model MainViewModel;
+
+@{
+    Layout = "~/Views/Shared/_AuthenticatedLayout.cshtml";
+    var userName = ViewData["UserName"] as string;
+    var scores = CalculateIndicates.GetScores(Model.EconomicData);
+    var marketState = CalculateIndicates.GetCurrentState(CalculateIndicates.GetTotalScore(scores));
+}
+<form method="post" class="text-black">
+    <div id="chart-data" data-json='@Html.Raw(JsonConvert.SerializeObject(scores))'></div>
+    <div class="mt-0 mb-5 container-fluid" style="background-image: url('../images/coolbackgrounds-particles-ether.png');background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;height:800px;">
+        <div class="text-black" style="position:relative; top:300px; left:120px;">
+            <div class="" id="main-title" style="font-size:110px;text-shadow: 4px 10px 10px rgba(0,0,0,0.6);">ViewMyAssetDev</div>
+            <div class="ms-5" style="color:#353535;font-size:30px;">환영합니다, <span class="text-black">@userName 님!</span></div>
+            <button asp-action="MyAsset" class="btn ms-5 mt-5" id="main-btn">내 자산 보러가기</button>
+        </div>
+    </div>
+    <div class="container" style="margin-top:200px;">
+        <h3 class="fw-bold ms-5" style="">▼&nbsp;&nbsp;주요 경제지표 분석</h3>
+        <div class="mx-5">
+            <hr />
+            <div class="mx-5" style="">
+                <canvas id="radarChart"></canvas>
+            </div>
+            <div class="mx-5" style="font-size:20px;">
+                <div class="h2 mt-3">종합 지표 평가</div>
+                <hr />
+                <div>현재 시장 상태 : @marketState</div>
+                <table class="table mt-5">
+                    <thead>
+                        <tr>
+                            <th><span>지표</span></th>
+                            <th><span>값</span></th>
+                            <th><span>점수 (0 ~ 1)</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>GDP</td>
+                            <td>@Model.EconomicData.RealGDP</td>
+                            <td>@Math.Round(scores[0], 3)</td>
+                        </tr>
+                        <tr>
+                            <td>실업률</td>
+                            <td>@Model.EconomicData.UnemploymentRate %</td>
+                            <td>@Math.Round(scores[1], 3)</td>
+                        </tr>
+                        <tr>
+                            <td>인플레이션율</td>
+                            <td>@Model.EconomicData.InflationRate %</td>
+                            <td>@Math.Round(scores[2], 3)</td>
+                        </tr>
+                        <tr>
+                            <td>기준금리</td>
+                            <td>@Model.EconomicData.FederalFunds %</td>
+                            <td>@Math.Round(scores[3], 3)</td>
+                        </tr>
+                        <tr>
+                            <td>소비자 신뢰지수</td>
+                            <td>@Model.EconomicData.ConsumerSentiment</td>
+                            <td>@Math.Round(scores[4], 3)</td>
+                        </tr>
+                        <tr>
+                            <td>산업생산지수</td>
+                            <td>@Model.EconomicData.IndustrialProductionTotalIndex</td>
+                            <td>@Math.Round(scores[5], 3)</td>
+                        </tr>
+                        <tr>
+                            <td>비농업 신규 고용자 수</td>
+                            <td>@Model.EconomicData.TotalNonfarmPayroll</td>
+                            <td>@Math.Round(scores[6], 3)</td>
+                        </tr>
+                        <tr>
+                            <td>소매 판매액</td>
+                            <td>@Model.EconomicData.RetailSales</td>
+                            <td>@Math.Round(scores[7], 3)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="container" style="margin-top:200px;">
+        <h3 class="fw-bold ms-5" style="">▼&nbsp;&nbsp;주요 헤드라인 뉴스</h3>
+        <div class="mx-5">
+            <hr />
+        </div>
+        <section class="testimonial-carousel mt-5">
+            <div class="container">
+                <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <div class="testimonial-card text-center">
+                                <a href="@Model.Articles[0].ArticleUrl" style="width:60%" class="article-title d-inline-block h1 fw-bold">@Model.Articles[0].Title</a>
+                                <div class="mb-3"><span class="article-date">@DateTime.Parse(Model.Articles[0].PublishedDate).ToString("MMM dd, yyyy", CultureInfo.InvariantCulture)</span> | @Model.Articles[0].Publisher</div>
+                                <img style="width:100%" src="@Model.Articles[0].ImageUrl" />
+                            </div>
+                        </div>
+                        @for (int i = 1; i < 5; i++)
+                        {
+                            var item = Model.Articles[i];
+                            DateTime date = DateTime.Parse(item.PublishedDate);
+
+                            <div class="carousel-item">
+                                <div class="testimonial-card text-center">
+                                    <div class="testimonial-card text-center">
+                                        <a href="@item.ArticleUrl" style="width:60%" class="article-title d-inline-block h1 fw-bold">@item.Title</a>
+                                        <div class="mb-3"><span class="article-date">@date.ToString("MMM dd, yyyy", CultureInfo.InvariantCulture)</span> | @item.Publisher</div>
+                                        <img style="width:100%" src="@item.ImageUrl" />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+    <div class="container" style="margin-top:200px;">
+        <div class="mt-5" style="height:300px;">
+            <div class="" style="width:100%;height:100px;">
+                <h3 class="fw-bold ms-5" style="">▼&nbsp;&nbsp;가장 많이 거래되고 있어요!</h3>
+                <div class="mx-5">
+                    <hr/>
+                </div>
+            </div>
+
+
+            @for (int i = 0; i < 6; i++)
+            {
+                <div class="d-flex justify-content-center my-5" style="width:100%;height:120px;">
+                    @for (int j = 1; j <= 2; j++)
+                    {
+                        var item = Model.MostActives[2 * i + j - 1];
+
+                        <button type="submit" asp-action="FinanceData" asp-route-symbol="@item.Symbol" class="mx-5 my-2 w-75 d-flex align-items-center" style="border:none;border-radius:50px;box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;">
+                            @if (item.Domain != "null")
+                            {
+                                <div class="d-flex justify-content-center align-items-center" style="width:80px; height:80px;background-color:black;border-radius:50%;">
+                                    <img class="" src="@item.Domain" style="width:50px; height:50px;background-color:black;" />
+                                </div>
+                                <div class="ms-4 text-start">
+                                    <div style="font-size:24px;font-weight:bold;">@item.ShortName (@item.Symbol)</div>
+                                    @if (item.IsUp)
+                                    {
+                                        <div style="font-size:24px;color:#CD0000;font-weight:bold;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="8" fill="currentColor" viewBox="0 0 14 8" data-test="header-dir"><path d="M1.763 8a.8.8 0 01-.602-1.327L6.247.86a1 1 0 011.506 0l5.086 5.813A.8.8 0 0112.237 8z"></path></svg> @item.RegularMarketPrice <span style="font-size:16px;">@item.Currency (+@item.RegularMarketChangePercent%)</span></div>
+                                    }
+                                    else
+                                    {
+                                        <div style="font-size:24px;color:#0000CD;font-weight:bold;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" data-test="header-dir"><path d="M2.763 4a.8.8 0 00-.602 1.327l5.086 5.813a1 1 0 001.506 0l5.086-5.813A.8.8 0 0013.237 4z"></path></svg> @item.RegularMarketPrice <span style="font-size:16px;">@item.Currency (@item.RegularMarketChangePercent%)</span></div>
+                                    }
+                                    
+                                    
+                                </div> 
+                            }
+                            else
+                            {
+                                <div class="d-flex justify-content-center align-items-center" style="width:50px; height:50px;background-color:black;border-radius:50%;">
+                                    <div class="text-white fw-bold text-center pt-2" style="font-size:14px;width:32px; height:32px;background-  color:black;">@item.Symbol</div>
+                                </div>
+                            }
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+    <div class="mb-5"></div>
+</form>

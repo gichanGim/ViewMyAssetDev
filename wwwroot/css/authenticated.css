@@ -1,0 +1,115 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Gothic+A1:wght@100;200;300;400;500;600;700&family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+body {
+    background-color: #ffffff;
+    color: #ffffff;
+    font-family: "Gothic A1", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+#navbar {
+
+}
+
+#main-title {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    color: #353535;
+}
+
+#searchBox {
+    position: relative;
+    background: white;
+    border-radius: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+#suggestionList {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    list-style-type: none;
+    padding: 0;
+    width: 250px;
+    display: none;
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: "Gothic A1", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.suggestion-item {
+    padding: 12px 20px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: all 0.2s ease;
+    font-size:12px;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover {
+    background-color: #f0f0f0;
+}
+
+.search-icon {
+    position: absolute;
+    right: 195px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    transition: all 0.3s ease;
+}
+
+.chart-type {
+    text-decoration: none;
+    color: black;
+    font-size: 20px;
+    padding-bottom: 4px;
+    font-weight: bold;
+    display: block;
+    width: 60px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center; 
+    line-height:40px;
+}
+.chart-type:hover{
+    color:white;
+    background-color:black;
+}
+
+.article-title {
+    text-decoration: none;
+    font-family: "Merriweather", serif;
+    color:black;
+}
+
+.article-title:hover{
+    text-decoration:auto underline;
+}
+
+.article-date {
+    font-family: "Merriweather", serif;
+    font-style:italic;
+}
+
+#main-btn {
+    border-radius: 30px;
+    border: 3px solid black;
+    transition: all 0.3s ease;
+    font-size:26px;
+    padding:10px 35px;
+    font-weight:400;
+}
+
+#main-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}

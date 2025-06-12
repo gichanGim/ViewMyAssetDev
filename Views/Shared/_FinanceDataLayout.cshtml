@@ -1,0 +1,267 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ViewMyAssetDev</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/authenticated.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ViewMyAssetDev.style.css" asp-append-version="true" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-dark border-bottom box-shadow mb-3">
+            <div class="container-fluid mx-5">
+                <a class="navbar-brand text-white" asp-area="" asp-controller="Authenticated" asp-action="Main">ViewMyAssetDev</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between ms-5">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-area="" asp-controller="Authenticated" asp-action="Main">홈</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-area="" asp-controller="Authenticated" asp-action="MyAsset">내 자산</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">회원 정보 변경</a>
+                        </li>
+                    </ul>
+                    <form class="me-5">
+                        <input type="search" autocomplete="off" id="searchBox" class="form-control" placeholder="종목 코드로 검색" style="width:450px;" />
+                        <i class="fas fa-search search-icon"></i>
+                        <ul class="text-black" id="suggestionList" style="width:450px;"></ul>
+                    </form>
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div>
+        @RenderBody()
+    </div>
+
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script>
+        let myChart;
+
+        $(document).ready(function () {
+            console.log("페이지 로드 됨");
+
+            $.ajax({
+                url: "/Authenticated/GetChartData?type=1d",
+                method: "GET",
+                dataType: "json",  // JSON 데이터를 올바르게 파싱
+                success: function (data) {
+                    console.log("AJAX 요청 성공", data);
+                    updateChart(data);
+                },
+                error: function (xhr, status, error) {
+                    console.error("AJAX 요청 실패", xhr.responseText);
+                }
+            });
+        });
+
+        function updateChart(data) {
+            const chartData = data.map(item => ({
+                x: new Date(item.date),  // 날짜 변환
+                y: parseFloat(item.close).toFixed(2), // NaN 방지
+                high: parseFloat(item.high).toFixed(2),
+                low: parseFloat(item.low).toFixed(2)
+            }));
+
+            console.log("차트 데이터 확인:", chartData);
+
+            const ctx = document.getElementById("myChart").getContext("2d");
+
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            new Chart(ctx, {
+                type: "line",
+                data: {
+                    datasets: [{
+                        label: "종료 가격",
+                        data: chartData,    
+                        borderColor: "rgba(70, 166, 231)",
+                        borderWidth: 1,
+                        fill: true,
+                        backgroundColor: "rgba(70, 166, 231, 0.5)",
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: { 
+                            grid: { display: false },
+                            type: "time", 
+                            time: { unit: "year",  
+                                stepsize: 1, 
+                                displayFormats: {
+                                    month: "yyyy" // X축에 표시될 날짜 형식
+                                }
+                            }
+                        }, // X축 날짜 형식
+                        y: { 
+                            grid: { display: true },
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function (value) {
+                                    return parseFloat(value).toFixed(2);  // ✅ 소수점 둘째 자리까지 표시
+                                }
+                            }
+                        } // Y축 자동 조정
+                    },
+                    plugins: {
+                        legend:{
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: true,
+                            mode: "nearest", // ✅ 가장 가까운 데이터 값 표시
+                            intersect: false, // ✅ 마우스를 가져다 대면 모든 데이터 포인트 표시
+                            callbacks: {
+                                label: function (tooltipItem) {
+                                    let dataPoint = tooltipItem.raw;
+                                    if (!dataPoint) return "";
+                                    return [
+                                        `날짜: ${dataPoint.x}`,
+                                        `종료가: ${dataPoint.y}`,
+                                        `최고가: ${dataPoint.high}`,
+                                        `최저가: ${dataPoint.low}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    hover: { mode: "nearest", intersect: false }
+                }
+            });
+        }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            $("#sellStockForm").submit(function (event) {
+                event.preventDefault(); // 기본 폼 제출 방지
+
+                alert("SellStock");
+                $.ajax({
+                    url: "/Authenticated/SellStock",
+                    type: "POST",
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        alert(1);
+                        alert(response.success);
+                        if (response.success) {
+                            // 성공 시 FinanceData 페이지로 이동
+                            window.location.href = response.redirectUrl;
+                        } else {
+                            // ModelState 오류 메시지 표시
+                            let errorContainer = $("#sellStockErrors");
+                            errorContainer.html(""); // 기존 오류 삭제
+
+                            $.each(response.errors, function (index, error) {
+                                errorContainer.append("<div class='text-danger'>" + error + "</div>");
+                            });
+
+                            // 모달이 닫히지 않도록 유지
+                            $("#SellModal").modal("show");
+                        }
+                    },
+                    error: function () {
+                        alert("서버 오류 발생");
+                    }
+                });
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            let debounceTimer; // 디바운싱 타이머 변수
+
+            $("#searchBox").on("keyup", function () {
+                clearTimeout(debounceTimer); // 이전 타이머 제거
+
+                var query = $(this).val();
+                if (query.length > 0) {
+                    debounceTimer = setTimeout(function () { // 300ms 후 실행
+                        fetchAutocompleteResults(query);
+                    }, 10);
+                } else {
+                    $("#suggestionList").hide();
+                }
+            });
+
+            // 자동완성 목록 가져오는 함수 (AJAX 요청)
+            function fetchAutocompleteResults(query) {
+                $.ajax({
+                    url: "/Authenticated/ReturnCodesJson",
+                    type: "GET",
+                    data: { code: query },
+                    success: function (data) {
+                        var suggestionList = $("#suggestionList");
+                        suggestionList.empty();
+
+                        if (data.length > 0) {
+                            data.forEach(function (item) {
+                                suggestionList.append(
+                                    "<li class='suggestion-item' data-symbol='" + item.symbol + "'>" +
+                                    item.symbol + " - " + item.name + " - " + item.exchDisp +
+                                    "</li>"
+                                );
+                            });
+                            suggestionList.show();
+                        }
+                        else {
+                            suggestionList.hide();
+                        }
+                    },
+                    error: function () {
+                        console.error("자동완성 데이터를 가져오는 중 오류 발생");
+                    }
+                });
+            }
+
+            $(document).on("click", ".suggestion-item", function () {
+                var selectedSymbol = $(this).data("symbol"); // 선택된 심볼 값 가져오기
+                $("#searchBox").val(selectedSymbol);
+                $("#suggestionList").hide();
+
+                // 선택된 심볼 값을 서버로 전달하여 액션 메서드 실행
+                sendSelectedSymbolToServer(selectedSymbol);
+            });
+
+            function sendSelectedSymbolToServer(symbol) {
+                $.ajax({
+                    url: "/Authenticated/ReturnSuccessAjax", // 실행할 액션 메서드 URL
+                    type: "POST", // POST 방식으로 데이터 전송
+                    data: { symbol: symbol }, // 선택된 symbol 값 전달
+                    success: function (response) {
+                        if (response.success) {
+                            window.location.href = response.redirectUrl; // AJAX 응답에서 받은 URL로 이동
+                        } else {
+                            alert(response.message); // 오류 메시지 표시
+                        }
+                    },
+                    error: function () {
+                        alert("서버 요청 중 오류가 발생했습니다.");
+                    }
+                });
+            }
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,148 @@
+﻿@using Newtonsoft.Json
+@using ViewMyAssetDev.ViewModels;
+@model List<MyAssetViewModel>;
+
+@{
+    Layout = "~/Views/Shared/_MyAssetLayout.cshtml";
+    decimal totalAsset = 0;
+    decimal totalPurchased = 0;
+    decimal totalProfit = 0;
+    bool isUp;
+
+    foreach (var k in Model)
+    {
+        totalAsset += k.CurrentPrice * k.ExchangeRate;
+        totalPurchased += k.PurchasePrice * k.ExchangeRate;
+    }
+
+    totalProfit = totalAsset - totalPurchased;
+
+    if (totalAsset > totalPurchased)
+        isUp = true;
+    else
+        isUp = false;
+
+    var dict = new Dictionary<string, decimal>();
+
+    foreach (var dat in Model)
+    {
+        string type = dat.Type switch
+        {
+            "EQUITY" => "주식",
+            "ETF" => "ETF",
+            "FUTURE" => "선물 옵션",
+            "FOREX" => "외화",
+            "INDEX" => "지수",
+            "MUTUALFUND" => "상호 펀드",
+            "CRYPTOCURRENCY" => "가상화폐",
+            "COMBINATION" => "복합 옵션",
+            _ => "unknown"
+        };
+
+        decimal price = dat.CurrentPrice;
+
+        if (dict.ContainsKey(type))
+            dict[type] += price;
+        else
+            dict.Add(type, price);
+    }
+
+    var chartDataList = dict.Select(x => new DoughnutChartData
+            {
+                Type = x.Key,
+                Price = x.Value
+            }).ToList();
+}
+<div id="chart-data" data-json='@Html.Raw(JsonConvert.SerializeObject(chartDataList))'></div>
+<div class="container-fluid d-flex" style="height:600px; background-color:cadetblue;">
+    <div class="justify-content-center align-items-center d-flex" style="flex:5;"> 
+        <div class="justify-content-center">
+            <div class="h3 fw-bold">* 내 자산 변동 사항 보기</div>
+            <hr/>
+            <label class="form-label h1 fw-bold">나의 총 자산 : @(totalAsset.ToString("N0")) 원</label><br/>
+            @if (isUp)
+            {
+                <label class="form-label h3 fw-bold text-black ms-4"><span style="color:#CD0000"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="8" fill="currentColor" viewBox="0 0 14 8" data-test="header-dir"><path d="M1.763 8a.8.8 0 01-.602-1.327L6.247.86a1 1 0 011.506 0l5.086 5.813A.8.8 0 0112.237 8z"></path></svg> @(totalProfit.ToString("N0")) 원</span> 상승했어요!</label>
+            }
+            else
+            {
+                <label class="form-label h3 fw-bold text-black ms-2">
+                    <span style="color:#0000CD"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" data-test="header-dir"><path d="M2.763 4a.8.8 0 00-.602 1.327l5.086 5.813a1 1 0 001.506 0l5.086-5.813A.8.8 0 0013.237 4z"></path></svg> @(Math.Abs(totalProfit).ToString("N0")) 원</span> 하락했어요!
+                </label>
+            }
+        </div>
+    </div>
+    <div style="flex:5" class="d-flex justify-content-center align-items-center">
+        <div class="d-flex flex-column align-items-center" style="width:450px; height:550px;">
+            <div class="fw-bold mb-2" style="font-size:30px; white-space:nowrap;">*&nbsp;&nbsp;보유 자산 현황</div>
+            <hr class="mt-0" style="width:100%;height:2px;" />
+            <canvas id="doughnutChart"></canvas>
+        </div>
+    </div>
+</div>
+<div class="container bootstrap snippets bootdey mt-5 mb-5">
+    <div class="mx-5 text-black">
+        <h2 class="fw-bold ">현재 보유 자산</h2>
+        <div class="row mt-5">
+            <div class="col-lg-12">
+                <div class="main-box no-header clearfix">
+                    <div class="main-box-body clearfix">
+                        <div class="table-responsive">
+                            <table class="table user-list">
+                                <thead>
+                                    <tr>
+                                        <th><span>종목 코드</span></th>
+                                        <th><span>매수 금액</span></th>
+                                        <th><span>평가 금액</span></th>
+                                        <th><span>보유 수량</span></th>
+                                        <th><span>총 수익</span></th>
+                                        <th>&nbsp;</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach(var mod in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a asp-action="FinanceData" asp-route-symbol="@mod.Symbol" style="text-decoration:none;" class="text-black user-link h4 fw-bold">@mod.Symbol</a>
+                                                <div class="user-subhead">@mod.ShortName</div>
+                                            </td>
+                                            <td class="fw-bold">@(Math.Round(mod.PurchasePrice * mod.ExchangeRate).ToString("N0")) 원</td>
+                                            <td class="fw-bold">
+                                                @(Math.Round(mod.CurrentPrice * mod.ExchangeRate).ToString("N0")) 원
+                                            </td>
+                                            <td class="fw-bold">
+                                                @mod.Amount
+                                            </td>
+                                            <td class="fw-bold">
+                                                @{
+                                                    var profit = Math.Abs(mod.CurrentPrice - mod.PurchasePrice);
+                                                    var profitRate = Math.Round((profit / mod.PurchasePrice), 3);
+                                                }
+                                                @if(@mod.PurchasePrice < @mod.CurrentPrice)
+                                                {
+                                                    <span class="text-danger">+ @(Math.Round(profit *   mod.ExchangeRate).ToString("N0")) 원</span>
+                                                    <span class="text-danger">(+ @profitRate %)</span>
+                                                }
+                                                else if (@mod.PurchasePrice > @mod.CurrentPrice)
+                                                {
+                                                    <span class="text-primary">- @(Math.Round(profit * mod.ExchangeRate).ToString("N0")) 원</span>
+                                                    <span class="text-primary">(- @profitRate %)</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>+ 0원</span>
+                                                    <span>(+0.00 %)</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

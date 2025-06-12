@@ -1,0 +1,179 @@
+﻿@using ViewMyAssetDev.ViewModels;
+@model FinanceDataViewModel;
+
+@{
+    Layout = "~/Views/Shared/_FinanceDataLayout.cshtml";
+}
+
+<form method="post">
+    <div class="vh-100 mt-5 text-black container"> 
+        <div class="d-flex justify-content-between ms-2">
+            <div class="d-flex">
+                <input style="display:none;" asp-for="Type" class="form-control" value="@Model.Type" />
+                <input style="display:none;" asp-for="MyAmount" class="form-control" value="@Model.MyAmount" />
+                @if (Model.Domain != "null")
+                {
+                    <div class="d-flex justify-content-center align-items-center" style="width:50px; height:50px;background-color:black;border-radius:50%;">
+                        <img class="" src="@Model.Domain" style="width:32px; height:32px;background-color:black;" />
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex justify-content-center align-items-center" style="width:50px; height:50px;background-color:black;border-radius:50%;">
+                        <div class="text-white fw-bold text-center pt-2" style="font-size:14px;width:32px; height:32px;background-color:black;">@Model.Symbol</div>
+                    </div>
+                }
+                <label class="fw-bold h1" style="" asp-for="LongName">&nbsp;@Model.LongName</label>&nbsp;&nbsp;
+                <label class="mt-2 h3 fw-bold">(</label>
+                <label class="mt-2 h3 fw-bold" asp-for="Symbol">@Model.Symbol</label>
+                <label class="mt-2 h3 fw-bold">)</label>
+            </div>
+            <div>
+                <button type="button" class="btn btn-danger text-white fw-bold" data-bs-toggle="modal" data-bs-target="#BuyModal">매수</button>
+                <button type="button" class="btn btn-primary text-white fw-bold" data-bs-toggle="modal" data-bs-target="#SellModal">매도</button>
+            </div>
+        </div>  
+        <label class="h5 ms-3" asp-for="ExchDisp">* @Model.ExchDisp</label>
+        <label class="h5">(</label>
+        <label class="h5" asp-for="FinancialCurrency">@Model.FinancialCurrency</label>
+        <label class="h5">)</label>
+        @if (Model.UpOrDown == "up") 
+        {
+            <div class="mt-5 ms-3 fw-bold" style="color:#CD0000;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="8" fill="currentColor" viewBox="0 0 14 8" data-test="header-dir"><path d="M1.763 8a.8.8 0 01-.602-1.327L 6.247.86a1 1 0 011.506 0l5.086 5.813A.8.8 0 0112.237 8z"></path></svg>
+                <label class="fw-bold" style="font-size:50px;" asp-for="CurrentPrice">@Model.CurrentPrice.ToString("F2")</label>
+                <label class="form-label ms-4" style="font-size:20px;">@Model.NetChange.ToString()</label>
+                <label class="form-label ms-2" style="font-size:20px;">(@Model.PercentageChange)</label>
+            </div>
+        }
+        else
+        {
+            <div class="mt-5 ms-3 fw-bold" style="color:#0000CD;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" data-test="header-dir"><path d="M2.763 4a.8.8 0 00-.602 1.327l5.086 5.813a1 1 0 001.506 0l5.086-5.813A.8.8 0 0013.237 4z"></path></svg>
+                <label class="fw-bold" style="font-size:50px;" asp-for="CurrentPrice">@Model.CurrentPrice.ToString("F2")</label>
+                <label class="form-label ms-4" style="font-size:20px;">@Model.NetChange</label>
+                <label class="form-label ms-2" style="font-size:20px;">(@Model.PercentageChange)</label>
+            </div>
+        }
+        <hr/ class="mt-1">
+        <div class="mt-5 me-5 d-flex">
+            <ul class="d-flex list-unstyled ms-5 justify-content-between" style="text-decoration:none;">
+                <li>
+                    <a class="chart-type mx-1" asp-action="GetChartData" asp-route-type="5m">5m</a>
+                </li>
+                <li>
+                    <a class="chart-type mx-1" asp-action="GetChartData" asp-route-type="15m">15m</a>
+                </li>
+                <li>
+                    <a class="chart-type mx-1" asp-action="GetChartData" asp-route-type="30m">30m</a>
+                </li>
+                <li>
+                    <a class="chart-type mx-1" asp-action="GetChartData" asp-route-type="1h">1h</a>
+                </li>
+                <li>
+                    <a class="chart-type mx-1" asp-action="GetChartData" asp-route-type="1d">1d</a>
+                </li>
+                <li>
+                    <a class="chart-type mx-1" asp-action="GetChartData" asp-route-type="1wk">1w</a>
+                </li>
+                <li>
+                    <a class="chart-type mx-1" asp-action="GetChartData" asp-route-type="1mo">1M</a>
+                </li>
+                <li>
+                    <a class="chart-type mx-1" asp-action="GetChartData" asp-route-type="3mo">3M</a>
+                </li>
+            </ul>
+        </div>
+        <canvas id="myChart"></canvas>
+        <div class="container mt-5">
+            <div class="h1">주요 뉴스</div>
+            <hr />
+            <div class="mx-5 mt-5">
+                <h5>뉴스 1</h5>
+                <h5>뉴스 1</h5>
+                <h5>뉴스 1</h5>
+                <h5>뉴스 1</h5>
+                <h5>뉴스 1</h5>
+            </div>
+        </div>
+    </div>
+</form> 
+
+<div class="text-black modal fade" id="BuyModal" tabindex="-1" aria-labelledby="BuyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="SellModalLabel">종목 매수하기</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="/Authenticated/BuyStock">
+                    <div class="mb-3">
+                        <label asp-for="PurchasedPrice" class="form-label">매수 가격 (@Model.FinancialCurrency)</label>
+                        <input asp-for="PurchasedPrice" class="form-control" placeholder="매수 가격" value="@Model.CurrentPrice.ToString("F2")" />
+                        <span asp-validation-for="PurchasedPrice" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Amount" class="form-label">매수 수량 (보유 수량 : @Model.MyAmount)</label>
+                        <input asp-for="Amount" class="form-control" placeholder="매수 수량" />
+                        <span asp-validation-for="Amount" class="text-danger"></span>
+                    </div>
+                    <div style="display:none">
+                        <input asp-for="CurrentPrice" class="form-control" value="@Model.CurrentPrice" />
+                        <input asp-for="Symbol" class="form-control" value="@Model.Symbol" />
+                        <input asp-for="LongName" class="form-control" value="@Model.LongName" />
+                        <input asp-for="ExchDisp" class="form-control" value="@Model.ExchDisp" />
+                        <input asp-for="FinancialCurrency" class="form-control" value="@Model.FinancialCurrency" />
+                        <input asp-for="UpOrDown" class="form-control" value="@Model.UpOrDown" />
+                        <input asp-for="Type" class="form-control" value="@Model.Type" />
+                        <input asp-for="NetChange" class="form-control" value="@Model.NetChange" />
+                        <input asp-for="PercentageChange" class="form-control" value="@Model.PercentageChange" />
+                    </div>
+                    <button type="submit" class="btn btn-danger">매수</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="text-black modal fade" id="SellModal" tabindex="-1" aria-labelledby="SellModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="SellModalLabel">종목 매도하기</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="/Authenticated/SellStock" name="sellStockForm" id="sellStockForm">
+                    <div id="sellStockErrors"></div>
+                    <div class="mb-3 mt-3">
+                        <label asp-for="PurchasedPrice" class="form-label">매도 가격 (@Model.FinancialCurrency)</label>
+                        <input asp-for="PurchasedPrice" class="form-control" placeholder="매도 가격" value="@Model.CurrentPrice.ToString("F2")" />
+                        <span asp-validation-for="PurchasedPrice" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Amount" class="form-label">매도 수량 (보유 수량 : @Model.MyAmount)</label>
+                        <input asp-for="Amount" class="form-control" placeholder="매도 수량" />
+                        <span asp-validation-for="Amount" class="text-danger"></span>
+                    </div>
+                    <div style="display:none"> 
+                        <input asp-for="CurrentPrice" class="form-control" value="@Model.CurrentPrice" />
+                        <input asp-for="Symbol" class="form-control" value="@Model.Symbol" />
+                        <input asp-for="LongName" class="form-control" value="@Model.LongName" />
+                        <input asp-for="ExchDisp" class="form-control" value="@Model.ExchDisp" />
+                        <input asp-for="FinancialCurrency" class="form-control" value="@Model.FinancialCurrency" />
+                        <input asp-for="UpOrDown" class="form-control" value="@Model.UpOrDown" />
+                        <input asp-for="Type" class="form-control" value="@Model.Type" />
+                        <input asp-for="NetChange" class="form-control" value="@Model.NetChange" />
+                        <input asp-for="PercentageChange" class="form-control" value="@Model.PercentageChange" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">매도</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
