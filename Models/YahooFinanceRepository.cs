@@ -9,7 +9,7 @@ namespace ViewMyAssetDev.Models
 {
     public class YahooFinanceRepository
     {
-        private static readonly HttpClient client = new HttpClient();
+        private static readonly HttpClient client = new HttpClient();  
 
         /// <summary>
         /// 해당 종목 코드에 대한 상세 정보 Json으로 return
@@ -24,7 +24,7 @@ namespace ViewMyAssetDev.Models
                 RequestUri = new Uri($"https://yahoo-finance15.p.rapidapi.com/api/v1/markets/stock/modules?ticker={code}&module=financial-data"),
                 Headers =
                 {
-                    { "x-rapidapi-key", "32603ea9f9mshe73eee6d6a3264ap12e988jsnad9da7aa51f8" },
+                    { "x-rapidapi-key", "Your API KEY" },
                     { "x-rapidapi-host", "yahoo-finance15.p.rapidapi.com" },
                 },
             };
@@ -51,7 +51,7 @@ namespace ViewMyAssetDev.Models
                 RequestUri = new Uri($"https://yahoo-finance15.p.rapidapi.com/api/v1/markets/search?search={str}"),
                 Headers =
                 {
-                    { "x-rapidapi-key", "32603ea9f9mshe73eee6d6a3264ap12e988jsnad9da7aa51f8" },
+                    { "x-rapidapi-key", "Your API KEY" },
                     { "x-rapidapi-host", "yahoo-finance15.p.rapidapi.com" },
                 },
             };
@@ -76,7 +76,7 @@ namespace ViewMyAssetDev.Models
                 RequestUri = new Uri($"https://yahoo-finance15.p.rapidapi.com/api/v1/markets/stock/quotes?ticker={uri}"),
                 Headers =
                 {
-                    { "x-rapidapi-key", "32603ea9f9mshe73eee6d6a3264ap12e988jsnad9da7aa51f8" },
+                    { "x-rapidapi-key", "Your API KEY" },
                     { "x-rapidapi-host", "yahoo-finance15.p.rapidapi.com" },
                 },
             };
@@ -98,7 +98,7 @@ namespace ViewMyAssetDev.Models
                 RequestUri = new Uri($"https://yahoo-finance15.p.rapidapi.com/api/v1/markets/stock/history?symbol={symbol}&interval={type}&diffandsplits=false"),
                 Headers =
                 {
-                    { "x-rapidapi-key", "32603ea9f9mshe73eee6d6a3264ap12e988jsnad9da7aa51f8" },
+                    { "x-rapidapi-key", "Your API KEY" },
                     { "x-rapidapi-host", "yahoo-finance15.p.rapidapi.com" },
                 },
             };
@@ -113,7 +113,7 @@ namespace ViewMyAssetDev.Models
 
         public static async Task<string> GetLogoBySymbol(string symbol)
         {
-            var apiKey = "FZzGxtp2BrGO43awD93Gih3TrUjPUPGt";
+            var apiKey = "Your API KEY";
             var url = $"https://financialmodelingprep.com/stable/profile?symbol={symbol}&apikey={apiKey}";
                 
             using (var httpClient = new HttpClient())
@@ -134,7 +134,7 @@ namespace ViewMyAssetDev.Models
 
         public static async Task<List<string>> GetLogoBySymbolList(List<string> symbols)
         {
-            var apiKey = "FZzGxtp2BrGO43awD93Gih3TrUjPUPGt";
+            var apiKey = "Your API KEY";
             var joinedSymbols = string.Join(",", symbols);
             var url = $"https://financialmodelingprep.com/api/v3/profile/symbol={joinedSymbols}?apikey={apiKey}";
 
@@ -157,7 +157,7 @@ namespace ViewMyAssetDev.Models
 
         public static async Task<List<Article>> GetArticles()
         {
-            var apiKey = "FZzGxtp2BrGO43awD93Gih3TrUjPUPGt";
+            var apiKey = "Your API KEY";
             var url = $"https://financialmodelingprep.com/stable/news/general-latest?page=0&limit=20&apikey={apiKey}";
 
             using (var httpClient = new HttpClient())
@@ -192,7 +192,7 @@ namespace ViewMyAssetDev.Models
                 RequestUri = new Uri("https://yahoo-finance15.p.rapidapi.com/api/v1/markets/screener?list=most_actives"),
                 Headers =
                 {
-                    { "x-rapidapi-key", "32603ea9f9mshe73eee6d6a3264ap12e988jsnad9da7aa51f8" },
+                    { "x-rapidapi-key", "Your API KEY" },
                     { "x-rapidapi-host", "yahoo-finance15.p.rapidapi.com" },
                 },
             };
@@ -236,7 +236,7 @@ namespace ViewMyAssetDev.Models
                 RequestUri = new Uri($"https://yahoo-finance15.p.rapidapi.com/api/v1/markets/quote?ticker={symbol}&type=STOCKS"),
                 Headers =
                 {
-                    { "x-rapidapi-key", "32603ea9f9mshe73eee6d6a3264ap12e988jsnad9da7aa51f8" },
+                    { "x-rapidapi-key", "Your API KEY" },
                     { "x-rapidapi-host", "yahoo-finance15.p.rapidapi.com" },
                 },
             };
@@ -262,7 +262,7 @@ namespace ViewMyAssetDev.Models
                 RequestUri = new Uri($"https://yahoo-finance15.p.rapidapi.com/api/v1/markets/stock/quotes?ticker={symbol}"),
                 Headers =
                 {
-                    { "x-rapidapi-key", "32603ea9f9mshe73eee6d6a3264ap12e988jsnad9da7aa51f8" },
+                    { "x-rapidapi-key", "Your API KEY" },
                     { "x-rapidapi-host", "yahoo-finance15.p.rapidapi.com" },
                 },
             };
@@ -309,7 +309,7 @@ namespace ViewMyAssetDev.Models
         {
             using (HttpClient client = new HttpClient())
             {
-                string apikey = "FZzGxtp2BrGO43awD93Gih3TrUjPUPGt";
+                string apikey = "Your API KEY";
 
                 string url = $"https://financialmodelingprep.com/stable/economic-indicators?name={indicate}&apikey={apikey}";
 
